@@ -3,13 +3,13 @@
 ETCD_INITIAL_CLUSTER_TOKEN: square-cluster
 
 # URL for the API server (IP is of the master's machine)
-MASTER_IP: <master ip>
+MASTER_IP: 10.131.38.250
 
 # URL for the API server (IP is of the master's machine)
-MASTER_URL: https://<master ip>
+MASTER_URL: https://10.131.38.250
 
 # Name of cloud provider (can be left empty)
-CLOUD_PROVIDER: aws
+# CLOUD_PROVIDER: aws
 
 # The name of the Ansible group where all the etcd machines belong.
 # Used by etcd-node.
@@ -20,9 +20,9 @@ ETCD_ANSIBLE_GROUP: etcd
 # here, since a playbook forgroup since these could be private IPs (and we do
 # not gather facts for that group)
 ETCD_HOSTS:
-- http://<master ip>:2379
-- http://<etcdnode ip>:2379
-- http://<etcdnode ip>:2379
+- http://10.131.38.250:2379
+- http://10.131.38.252:2379
+- http://10.131.39.8:2379
 
 # OPTIONAL: Public IP of the API server. This is used by the certificate
 # generation code to add this IP address to the certificate.
@@ -60,15 +60,15 @@ K8S_SERVICE_IP: 10.3.0.1
 DNS_SERVICE_IP: 10.3.0.10
 
 #kubernetes version
-KUBERNETES_VERSION: 1.1.2
+KUBERNETES_VERSION: 1.5.2
 
 # Hyperkube is an all in one docker image that contains an apiserver,
 # kubeproxy and various other binaries.
-HYPERKUBE_IMAGE: thesamet-docker-registry.bintray.io/kubernetes/hyperkube:v1.1.2-0ede84e6
+HYPERKUBE_IMAGE: quay.io/coreos/hyperkube:v1.5.2_coreos.0
 
 # Path to download kubelet from.
-KUBELET_BINARY: https://s3.amazonaws.com/opsitters/kubernetes-release/v1.1.2/kubelet
+# KUBELET_BINARY: https://s3.amazonaws.com/opsitters/kubernetes-release/v1.1.2/kubelet
 
 # Path to download kubectl form.
-KUBECTL_BINARY: https://s3.amazonaws.com/opsitters/kubernetes-release/v1.1.2/kubectl
+# KUBECTL_BINARY: https://s3.amazonaws.com/opsitters/kubernetes-release/v1.1.2/kubectl
 

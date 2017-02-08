@@ -1,4 +1,4 @@
----
-dependencies:
-- kubernetes-common/kubelet-download
+# ---
+# dependencies:
+# - kubernetes-common/kubelet-download
 

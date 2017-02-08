@@ -1,16 +1,16 @@
 [master]
-core1 ansible_ssh_host=<master ip>
+core1 ansible_ssh_host=46.101.35.52
 
-[minions]
-core2 ansible_ssh_host=<minion1 ip>
-core3 ansible_ssh_host=<minion2 ip>
 
 [etcd]
-core1 ansible_ssh_host=<master ip>
-core4 ansible_ssh_host=<etcdnode ip>
-core5 ansible_ssh_host=<etcdnode ip>
+core1 ansible_ssh_host=46.101.35.52
+core2 ansible_ssh_host=46.101.35.54
+core3 ansible_ssh_host=46.101.35.55
 
 [coreos:children]
 master
 etcd
-minions
+
+[coreos:vars]
+ansible_ssh_user=core
+ansible_python_interpreter="PATH=/opt/bin:$PATH python"
