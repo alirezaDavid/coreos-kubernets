@@ -1,9 +1,8 @@
 ---
 - hosts: coreos
   gather_facts: false
-  sudo: yes
-  # roles:
-  # - defunctzombie.coreos-bootstrap
+  roles:
+  - vmware.coreos-bootstrap
   tasks:
   - name: install httplib2
     pip: name=httplib2
@@ -17,9 +16,12 @@
   sudo: yes
   roles:
   - kubernetes-master
+  - kubernetes-master/cloud-config
 
-# - hosts: minions
-#   sudo: yes
-#   roles:
-#   - kubernetes-worker
+- hosts: minions
+  gather_facts: true
+  sudo: yes
+  roles:
+  - kubernetes-worker/cloud-config
+  - kubernetes-worker
 

@@ -1,0 +1,13 @@
+- name: create cloud config file
+  copy: 
+    src: cloud-config.yaml
+    dest: /tmp/cloud-config.yaml
+  sudo: yes
+  sudo_user: root  
+  register: cloud_config
+
+- name: run cloud config
+  raw: /bin/coreos-cloudinit --from-file=/tmp/cloud-config.yaml
+  sudo: yes
+  sudo_user: root
+  when: cloud_config.changed

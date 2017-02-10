@@ -1,13 +1,8 @@
 [Service]
-Environment=KUBELET_VERSION={{K8S_VER}}
-Environment="RKT_OPTS=--uuid-file-save=/var/run/kubelet-pod.uuid \
-  --volume var-log,kind=host,source=/var/log \
-  --mount volume=var-log,target=/var/log \
-  --volume dns,kind=host,source=/etc/resolv.conf \
-  --mount volume=dns,target=/etc/resolv.conf"
+Environment=KUBELET_IMAGE_TAG={{KUBERNETES_VERSION}}
+Environment=KUBELET_IMAGE_URL={{HYPERKUBE_IMAGE}}
 ExecStartPre=/usr/bin/mkdir -p /etc/kubernetes/manifests
 ExecStartPre=/usr/bin/mkdir -p /var/log/containers
-ExecStartPre=-/usr/bin/rkt rm --uuid-file=/var/run/kubelet-pod.uuid
 ExecStart=/usr/lib/coreos/kubelet-wrapper \
   --api-servers=http://127.0.0.1:8080 \
   --register-schedulable=false \
@@ -17,7 +12,6 @@ ExecStart=/usr/lib/coreos/kubelet-wrapper \
   --hostname-override={{ansible_eth1.ipv4.address}} \
   --cluster_dns={{DNS_SERVICE_IP}} \
   --cluster_domain=cluster.local
-ExecStop=-/usr/bin/rkt stop --uuid-file=/var/run/kubelet-pod.uuid
 Restart=always
 RestartSec=10
 

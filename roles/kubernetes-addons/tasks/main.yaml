@@ -1,0 +1,7 @@
+- name: create kube-proxy pod manifest
+  files: src={{item}} dest=/etc/kubernetes/addons
+  with_items:
+    - kube-dashboard-svc.yaml
+    - kube-dashboard-rc.yaml
+
+    

@@ -1,0 +1,80 @@
+#cloud-config
+
+coreos:
+  units:
+    - name: iptables-restore.service
+      enable: true
+      command: start
+    - name: docker.service
+      enable: true
+      command: restart
+    - name: update-engine.service
+      command: stop
+    - name: locksmithd.service
+      command: stop
+write_files:
+  - path: /var/lib/iptables/rules-save
+    permissions: 0644
+    owner: root:root
+    content: |
+      *filter
+      :INPUT DROP [0:0]
+      :FORWARD DROP [0:0]
+      :OUTPUT ACCEPT [0:0]
+      :Block_Spoofing - [0:0]
+      :Rate_Limit - [0:0]
+      :Stop_Scanning - [0:0]
+      -A INPUT -j Stop_Scanning
+      -A INPUT -j Block_Spoofing
+      -A INPUT -j Rate_Limit
+      -A INPUT -i lo -j ACCEPT
+      -A INPUT -i eth1 -j ACCEPT
+      -A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+      -A INPUT -p tcp -m tcp --dport 22 -j ACCEPT
+      -A INPUT -p tcp -m tcp --dport 80 -j ACCEPT
+      -A INPUT -p tcp -m tcp --dport 443 -j ACCEPT
+      -A Block_Spoofing -s 10.0.0.0/8 -i eth0 -j DROP
+      -A Block_Spoofing -d 10.0.0.0/8 -i eth0 -j DROP
+      -A Block_Spoofing -s 172.16.0.0/12 -i eth0 -j DROP
+      -A Block_Spoofing -d 172.16.0.0/12 -i eth0 -j DROP
+      -A Block_Spoofing -s 192.168.0.0/16 -i eth0 -j DROP
+      -A Block_Spoofing -d 192.168.0.0/16 -i eth0 -j DROP
+      -A Block_Spoofing -s 127.0.0.0/8 -i eth0 -j DROP
+      -A Block_Spoofing -d 127.0.0.0/8 -i eth0 -j DROP
+      -A Block_Spoofing -s 0.0.0.0/8 -i eth0 -j DROP
+      -A Block_Spoofing -d 0.0.0.0/8 -i eth0 -j DROP
+      -A Block_Spoofing -s 224.0.0.0/3 -i eth0 -j DROP
+      -A Block_Spoofing -d 224.0.0.0/3 -i eth0 -j DROP
+      -A Block_Spoofing -s 169.254.0.0/16 -i eth0 -j DROP
+      -A Block_Spoofing -d 169.254.0.0/16 -i eth0 -j DROP
+      -A Rate_Limit -p tcp -m tcp --dport 22 -m state --state NEW -m recent --set --name SSH --mask 255.255.255.255 --rsource
+      -A Rate_Limit -p tcp -m tcp --dport 22 -m state --state NEW -m recent --update --seconds 30 --hitcount 15 --name SSH --mask 255.255.255.255 --rsource -j DROP
+      -A Stop_Scanning -i eth0 -p tcp -m tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG FIN,PSH,URG -m comment --comment "NMAP FIN/URG/PSH" -j DROP
+      -A Stop_Scanning -i eth0 -p tcp -m tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG FIN,SYN,RST,PSH,ACK,URG -m comment --comment "Xmas Tree type scanning" -j DROP
+      -A Stop_Scanning -i eth0 -p tcp -m tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG FIN,SYN,RST,ACK,URG -m comment --comment "Xmas Tree type scanning" -j DROP
+      -A Stop_Scanning -i eth0 -p tcp -m tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG NONE -m comment --comment "null scanning" -j DROP
+      -A Stop_Scanning -i eth0 -p tcp -m tcp --tcp-flags SYN,RST SYN,RST -m comment --comment "SYN/RST" -j DROP
+      -A Stop_Scanning -i eth0 -p tcp -m tcp --tcp-flags FIN,SYN FIN,SYN -m comment --comment "SYN/FIN" -j DROP
+      -A INPUT -p icmp -m icmp --icmp-type 0 -j ACCEPT
+      -A INPUT -p icmp -m icmp --icmp-type 3 -j ACCEPT
+      -A INPUT -p icmp -m icmp --icmp-type 11 -j ACCEPT
+      -A INPUT -p udp --dport 8472 -j ACCEPT -m comment --comment "vxlan"
+      -I INPUT  -i docker0 -j ACCEPT -m comment --comment "kube-proxy redirects"
+      -I FORWARD 1 -o docker0 -j ACCEPT -m comment --comment "docker subnet"
+      -I FORWARD 1 -i docker0 -j ACCEPT -m comment --comment "docker subnet"
+      -I FORWARD 1 -i flannel.1 -j ACCEPT -m comment --comment "flannel subnet"
+      -I FORWARD 1 -o flannel.1 -j ACCEPT -m comment --comment "flannel subnet"
+      COMMIT
+
+  - path: /etc/ssh/sshd_config
+    permissions: 0600
+    owner: root:root
+    content: |
+      # Use most defaults for sshd configuration.
+      UsePrivilegeSeparation sandbox
+      Subsystem sftp internal-sftp
+
+      PermitRootLogin no
+      AllowUsers core
+      PasswordAuthentication no
+      ChallengeResponseAuthentication no

@@ -22,6 +22,7 @@
 
 - name: get netconfig 
   command: etcdctl mk /coreos.com/network/config '{"Network":"{{POD_NETWORK}}"}'
+  ignore_errors: yes
   when: "'master' in group_names"
 
 - name: ensure flanneld is running

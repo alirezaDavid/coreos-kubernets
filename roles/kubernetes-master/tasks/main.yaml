@@ -7,18 +7,6 @@
 - name: Waiting for API to start (stay patient - pulling images)
   wait_for: host=127.0.0.1 port=8080
 
-- name: Creating Kubernetes namespace
-  uri: >
-    method=POST
-    url=http://127.0.0.1:8080/api/v1/namespaces
-    body='{"apiVersion":"v1","kind":"Namespace","metadata":{"name":"kube-system"}}'
-  register: kube_result
-  failed_when: >
-      not (kube_result.status == 201 or (
-          kube_result.status == 409 and
-          'already exists' in kube_result.json.message))
-  changed_when: "kube_result.status == 201"
-
 - name: Creating service and replication controller specs for DNS.
   template: src={{item}}.yaml.j2 dest=/tmp/{{item}}.yaml
   with_items:

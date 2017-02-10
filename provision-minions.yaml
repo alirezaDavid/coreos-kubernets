@@ -1,0 +1,14 @@
+---
+- hosts: minions
+  gather_facts: false
+  roles:
+  - vmware.coreos-bootstrap
+  tasks:
+  - name: install httplib2
+    pip: name=httplib2
+
+- hosts: minions
+  gather_facts: true
+  sudo: yes
+  roles:
+  - kubernetes-worker

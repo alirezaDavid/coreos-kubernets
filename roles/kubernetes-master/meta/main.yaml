@@ -10,5 +10,3 @@ dependencies:
 - kubernetes-master/kube-controller-manager
 - kubernetes-master/kube-scheduler
 - kubernetes-master/admin-user
-# - kubernetes-master/example
-
