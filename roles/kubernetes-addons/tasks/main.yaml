@@ -1,7 +1,17 @@
+- name: create addons directory
+  file: name=/etc/kubernetes/addons state=directory
+
 - name: create kube-proxy pod manifest
-  files: src={{item}} dest=/etc/kubernetes/addons
+  copy: src={{ item }} dest=/etc/kubernetes/addons
   with_items:
     - kube-dashboard-svc.yaml
     - kube-dashboard-rc.yaml
+  register: kube_dashboard
 
-    
+- name: Create dashboard addons
+  command: 
+    /opt/local/bin/kubectl create 
+      --kubeconfig=/home/core/.kube/config 
+      -f /etc/kubernetes/addons/kube-dashboard-rc.yaml,/etc/kubernetes/addons/kube-dashboard-svc.yaml
+  when: kube_dashboard.changed
+
